@@ -1,9 +1,17 @@
 // import 'dart:html';
-
+import 'dart:async';
+import 'dart:math' as math; // ランダム値を取得するライブラリ
+import 'package:flutter/services.dart'; // rootBundle
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(const HomePage());
+}
+
+// ファイルを読み込んで表示
+Future loadAssetsCsvFile(String name) async {
+  // ignore: avoid_print
+  return rootBundle.loadString('assets/' + name);
 }
 
 class HomePage extends StatelessWidget {
@@ -11,14 +19,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   appBar: AppBar(title: Text("HomePage")),
-    //   body: Center(child: Text("child")),
-    // );
     return MaterialApp(
         title: 'home',
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: BrainPage());
+        home: const BrainPage());
   }
 }
 
@@ -30,15 +34,23 @@ class BrainPage extends StatefulWidget {
 }
 
 class _BrainPageState extends State<BrainPage> {
-  final items = [1, 2, 3];
-  final ideaLists = [];
-  final _formKey = GlobalKey<FormState>();
+  final _ideaLists = [];
   final _textEditingController = TextEditingController();
 
-  void _addIdeaList() {
-    // setStateの中で値を更新すると、画面が再描画される
+  // CSVファイルを読み込み
+  final List<String> _data = [];
+  String _keyword = '';
+
+  void _loadCSV() async {
+    final _rawData = await rootBundle.loadString('assets/Noun.csv');
+
+    // 読み込んだCSVを改行コードずつリストへ格納する
+    for (String row in _rawData.split('\n')) {
+      _data.add(row);
+    }
+
     setState(() {
-      ideaLists.add(_textEditingController.text);
+      _keyword = _data[math.Random().nextInt(_data.length)].split(',').first;
     });
   }
 
@@ -48,25 +60,9 @@ class _BrainPageState extends State<BrainPage> {
         appBar: AppBar(title: const Text("ブレスト")),
         body: Column(
           children: <Widget>[
-            Padding(padding: const EdgeInsets.all(8.0)),
-            Form(
-              key: _formKey,
-              child: TextFormField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  hintText: 'キーワードを入力してください。',
-                  labelText: 'キーワード',
-                ),
-                validator: (value) {
-                  if (value == null) {
-                    return '必須です';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            Padding(padding: const EdgeInsets.all(8.0)),
+            const Padding(padding: EdgeInsets.all(8.0)),
+            ListTile(title: Text(_keyword)),
+            const Padding(padding: EdgeInsets.all(8.0)),
             Form(
               child: TextFormField(
                 controller: _textEditingController,
@@ -81,17 +77,16 @@ class _BrainPageState extends State<BrainPage> {
             ElevatedButton(
               child: const Text('クリック'),
               onPressed: () {
-                // ボタン押下時に入力した文字列を保存(下のリストに表示)
-                print(_textEditingController.text);
-                _addIdeaList();
+                loadAssetsCsvFile('Noun.csv');
+                _loadCSV();
               },
             ),
             Expanded(
               child: ListView.builder(
-                  itemCount: ideaLists.length,
+                  itemCount: _ideaLists.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text(ideaLists[index]),
+                      title: Text(_ideaLists[index]),
                     );
                   }),
             ),
