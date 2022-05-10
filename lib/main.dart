@@ -1,115 +1,110 @@
+// import 'dart:html';
+import 'dart:async';
+import 'dart:math' as math; // ランダム値を取得するライブラリ
+import 'package:flutter/services.dart'; // rootBundle
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const HomePage());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+// ファイルを読み込んで表示
+Future loadAssetsCsvFile(String name) async {
+  // ignore: avoid_print
+  return rootBundle.loadString('assets/' + name);
+}
 
-  // This widget is the root of your application.
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+        title: 'home',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: const BrainPage());
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class BrainPage extends StatefulWidget {
+  const BrainPage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<BrainPage> createState() => _BrainPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _BrainPageState extends State<BrainPage> {
+  final _ideaLists = [];
+  final _textEditingController = TextEditingController();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  // CSVファイルを読み込み
+  final List<String> _data = [];
+  String _keyword = '';
+
+  /// assets/内のNoun.csvを読み出し、配列上に展開する
+  /// [in]: void
+  /// [out]: _keyword 名詞のリスト
+  void _loadCSV() async {
+    Future<String> _rawData = rootBundle.loadString('assets/Noun.csv');
+    _rawData.then((value) {
+      // 読み込んだCSVを改行コードずつリストへ格納する
+      for (String row in value.split('\n')) {
+        _data.add(row);
+      }
+      setState(() {
+        _keyword = _data[math.Random().nextInt(_data.length)].split(',').first;
+      });
     });
+  }
+
+  // StateクラスのinitStateをオーバーライド
+  // 画面描画時に1度のみ実行される
+  @override
+  void initState() {
+    super.initState();
+    _loadCSV();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+        appBar: AppBar(title: const Text("ブレスト")),
+        body: Column(
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            const Padding(padding: EdgeInsets.all(8.0)),
+            ListTile(title: Text(_keyword)),
+            const Padding(padding: EdgeInsets.all(8.0)),
+            Form(
+              child: TextFormField(
+                controller: _textEditingController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  hintText: 'アイデア',
+                  labelText: 'アイデア',
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            ElevatedButton(
+                onPressed: () {
+                  // キーワードを更新
+                  setState(() {
+                    _keyword = _data[math.Random().nextInt(_data.length)]
+                        .split(',')
+                        .first;
+                  });
+                },
+                child: const Text('キーワード更新')),
+            Expanded(
+              child: ListView.builder(
+                  itemCount: _ideaLists.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(_ideaLists[index]),
+                    );
+                  }),
             ),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        ));
   }
 }
