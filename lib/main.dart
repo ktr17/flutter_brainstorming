@@ -41,17 +41,28 @@ class _BrainPageState extends State<BrainPage> {
   final List<String> _data = [];
   String _keyword = '';
 
+  /// assets/内のNoun.csvを読み出し、配列上に展開する
+  /// [in]: void
+  /// [out]: _keyword 名詞のリスト
   void _loadCSV() async {
-    final _rawData = await rootBundle.loadString('assets/Noun.csv');
-
-    // 読み込んだCSVを改行コードずつリストへ格納する
-    for (String row in _rawData.split('\n')) {
-      _data.add(row);
-    }
-
-    setState(() {
-      _keyword = _data[math.Random().nextInt(_data.length)].split(',').first;
+    Future<String> _rawData = rootBundle.loadString('assets/Noun.csv');
+    _rawData.then((value) {
+      // 読み込んだCSVを改行コードずつリストへ格納する
+      for (String row in value.split('\n')) {
+        _data.add(row);
+      }
+      setState(() {
+        _keyword = _data[math.Random().nextInt(_data.length)].split(',').first;
+      });
     });
+  }
+
+  // StateクラスのinitStateをオーバーライド
+  // 画面描画時に1度のみ実行される
+  @override
+  void initState() {
+    super.initState();
+    _loadCSV();
   }
 
   @override
@@ -75,12 +86,15 @@ class _BrainPageState extends State<BrainPage> {
               ),
             ),
             ElevatedButton(
-              child: const Text('クリック'),
-              onPressed: () {
-                loadAssetsCsvFile('Noun.csv');
-                _loadCSV();
-              },
-            ),
+                onPressed: () {
+                  // キーワードを更新
+                  setState(() {
+                    _keyword = _data[math.Random().nextInt(_data.length)]
+                        .split(',')
+                        .first;
+                  });
+                },
+                child: const Text('キーワード更新')),
             Expanded(
               child: ListView.builder(
                   itemCount: _ideaLists.length,
