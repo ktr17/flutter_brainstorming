@@ -1,0 +1,2 @@
+get:
+	flutter pub get

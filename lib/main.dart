@@ -3,6 +3,8 @@ import 'dart:async';
 import 'dart:math' as math; // ランダム値を取得するライブラリ
 import 'package:flutter/services.dart'; // rootBundle
 import 'package:flutter/material.dart';
+import 'package:flutter_brainstorming/model/idea_model.dart';
+import 'package:flutter_brainstorming/model/database.dart';
 
 void main() {
   runApp(const HomePage());
@@ -52,10 +54,14 @@ class _BrainPageState extends State<BrainPage> {
         _data.add(row);
       }
       setState(() {
-        _keyword = _data[math.Random().nextInt(_data.length)].split(',').first;
+        _keyword = getRandomNoun();
       });
     });
   }
+
+  /// CSVファイルから抽出した名詞データをランダムで1つ返す
+  String getRandomNoun() =>
+      _data[math.Random().nextInt(_data.length)].split(',').first;
 
   // StateクラスのinitStateをオーバーライド
   // 画面描画時に1度のみ実行される
@@ -83,6 +89,23 @@ class _BrainPageState extends State<BrainPage> {
                   hintText: 'アイデア',
                   labelText: 'アイデア',
                 ),
+                // Enterキー押下でアイデアをリストに追加
+                onFieldSubmitted: (String? value) {
+                  if (value == null) return;
+
+                  // データベースにアイデアを保存
+                  var ideaModel = new IdeaModel.createIdea(value, _keyword);
+                  DBProvider.db.newIdea(ideaModel);
+
+                  setState(() {
+                    // アイデアをListViewに追加
+                    _ideaLists.add(value);
+                    _keyword = _data[math.Random().nextInt(_data.length)]
+                        .split(',')
+                        .first;
+                    _textEditingController.text = '';
+                  });
+                },
               ),
             ),
             ElevatedButton(
