@@ -1,110 +1,93 @@
-// import 'dart:html';
-import 'dart:async';
-import 'dart:math' as math; // ランダム値を取得するライブラリ
-import 'package:flutter/services.dart'; // rootBundle
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
+import 'package:flutter_brainstorming/ui/button_widget.dart';
+import 'brainstorming_page.dart';
+import 'package:flutter_brainstorming/add_item_theme_page.dart';
+import 'package:flutter_brainstorming/brainstorming_page.dart';
 
 void main() {
-  runApp(const HomePage());
+  runApp(const IdeaThemePage());
 }
 
-// ファイルを読み込んで表示
-Future loadAssetsCsvFile(String name) async {
-  // ignore: avoid_print
-  return rootBundle.loadString('assets/' + name);
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+/// アイデアテーマを登録・表示するView
+class IdeaThemePage extends StatelessWidget {
+  const IdeaThemePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'home',
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: const BrainPage());
+      theme: ThemeData(primarySwatch: Colors.cyan),
+      home: const ItemThemeListView(),
+    );
   }
 }
 
-class BrainPage extends StatefulWidget {
-  const BrainPage({Key? key}) : super(key: key);
+/// アイデアのテーマを表示するためのListViewを表示
+class ItemThemeListView extends StatefulWidget {
+  const ItemThemeListView({Key? key}) : super(key: key);
 
   @override
-  State<BrainPage> createState() => _BrainPageState();
+  State<StatefulWidget> createState() => _ItemThemeListView();
 }
 
-class _BrainPageState extends State<BrainPage> {
-  final _ideaLists = [];
-  final _textEditingController = TextEditingController();
-
-  // CSVファイルを読み込み
-  final List<String> _data = [];
-  String _keyword = '';
-
-  /// assets/内のNoun.csvを読み出し、配列上に展開する
-  /// [in]: void
-  /// [out]: _keyword 名詞のリスト
-  void _loadCSV() async {
-    Future<String> _rawData = rootBundle.loadString('assets/Noun.csv');
-    _rawData.then((value) {
-      // 読み込んだCSVを改行コードずつリストへ格納する
-      for (String row in value.split('\n')) {
-        _data.add(row);
-      }
-      setState(() {
-        _keyword = _data[math.Random().nextInt(_data.length)].split(',').first;
-      });
-    });
-  }
-
-  // StateクラスのinitStateをオーバーライド
-  // 画面描画時に1度のみ実行される
-  @override
-  void initState() {
-    super.initState();
-    _loadCSV();
-  }
-
+class _ItemThemeListView extends State<ItemThemeListView> {
+  final _ideaThemeList = <String>[];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("ブレスト")),
-        body: Column(
-          children: <Widget>[
-            const Padding(padding: EdgeInsets.all(8.0)),
-            ListTile(title: Text(_keyword)),
-            const Padding(padding: EdgeInsets.all(8.0)),
-            Form(
-              child: TextFormField(
-                controller: _textEditingController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  filled: true,
-                  hintText: 'アイデア',
-                  labelText: 'アイデア',
+        appBar: AppBar(title: const Text('アイデアテーマ')),
+        body: Padding(
+          padding: const EdgeInsets.only(right: 40, bottom: 65),
+          child: Stack(
+            children: [
+              ListView.builder(
+                itemCount: _ideaThemeList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(_ideaThemeList[index]),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            // TODO: テーマに対して、値を入力する
+                            builder: (context) => const InputIdeaPage()));
+                    },
+                  );
+                },
+              ),
+              // テーマを追加するためのボタンを配置する
+              // const Padding(padding: EdgeInsets.all(100)),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: () async {
+                    var ideaThema = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddItemThemePage()));
+                    setState(() {
+                      _ideaThemeList.add(ideaThema);
+                      // ListViewに値を追加する
+                    });
+                  },
+                  child: Container(
+                    width: 65,
+                    height: 65,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.green,
+                    ),
+                    child: const Center(
+                        child: Text(
+                      '+',
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    )),
+                  ),
                 ),
               ),
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  // キーワードを更新
-                  setState(() {
-                    _keyword = _data[math.Random().nextInt(_data.length)]
-                        .split(',')
-                        .first;
-                  });
-                },
-                child: const Text('キーワード更新')),
-            Expanded(
-              child: ListView.builder(
-                  itemCount: _ideaLists.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(_ideaLists[index]),
-                    );
-                  }),
-            ),
-          ],
+            ],
+          ),
         ));
   }
 }
