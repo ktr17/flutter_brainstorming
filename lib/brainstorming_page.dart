@@ -12,8 +12,8 @@ Future loadAssetsCsvFile(String name) async {
   return rootBundle.loadString('assets/' + name);
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class InputIdeaPage extends StatelessWidget {
+  const InputIdeaPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

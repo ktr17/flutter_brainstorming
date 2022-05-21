@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_brainstorming/ui/button_widget.dart';
 import 'brainstorming_page.dart';
 import 'package:flutter_brainstorming/add_item_theme_page.dart';
+import 'package:flutter_brainstorming/brainstorming_page.dart';
 
 void main() {
   runApp(const IdeaThemePage());
@@ -35,51 +36,58 @@ class _ItemThemeListView extends State<ItemThemeListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('アイデアテーマ')),
-      body: Stack(
-        children: [
-          ListView.builder(
-            itemCount: _ideaThemeList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                title: Text(_ideaThemeList[index]),
-              );
-            },
-          ),
-          // テーマを追加するためのボタンを配置する
-          // const Padding(padding: EdgeInsets.all(100)),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: GestureDetector(
-              onTap: () async {
-                var ideaThema = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AddItemThemePage()));
-                setState(() {
-                  _ideaThemeList.add(ideaThema);
-                  // ListViewに値を追加する
-                });
-              },
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: Colors.green,
-                ),
-                child: const Center(
-                    child: Text(
-                  '+',
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                )),
+        appBar: AppBar(title: const Text('アイデアテーマ')),
+        body: Padding(
+          padding: const EdgeInsets.only(right: 40, bottom: 65),
+          child: Stack(
+            children: [
+              ListView.builder(
+                itemCount: _ideaThemeList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(_ideaThemeList[index]),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            // TODO: テーマに対して、値を入力する
+                            builder: (context) => const InputIdeaPage()));
+                    },
+                  );
+                },
               ),
-            ),
+              // テーマを追加するためのボタンを配置する
+              // const Padding(padding: EdgeInsets.all(100)),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: () async {
+                    var ideaThema = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddItemThemePage()));
+                    setState(() {
+                      _ideaThemeList.add(ideaThema);
+                      // ListViewに値を追加する
+                    });
+                  },
+                  child: Container(
+                    width: 65,
+                    height: 65,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.green,
+                    ),
+                    child: const Center(
+                        child: Text(
+                      '+',
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    )),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
-
-  void _awaitReturnIdeaTheme(BuildContext context) async {}
 }
