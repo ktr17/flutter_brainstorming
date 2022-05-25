@@ -2,26 +2,20 @@
  * ブレストしたいテーマに掛け合わせるキーワードを表示する
  */
 
-// UUIDを生成するライブラリをインポート
-import 'package:uuid/uuid.dart';
-
 class IdeaModel {
-  String randomKeyword = '';
-  String ideaTheme = '';
-  String idea = '';
+  final String randomKeyword;
+  final int themeId;
+  final String ideaText;
 
   // 名前付きパラメータを持つコンストラクタ
   IdeaModel(
-      {
-      required this.randomKeyword,
-      required this.ideaTheme,
-      required this.idea
-      });
+      {required this.randomKeyword,
+      required this.ideaText,
+      required this.themeId});
 
   /// アイデアを引数にわたすと、IDやキーワードを生成するファクトリコンストラクタ
-  factory IdeaModel.createIdea(String idea, String randomKeyword) {
-
+  factory IdeaModel.createIdea(String ideaText, String randomKeyword) {
     return new IdeaModel(
-        randomKeyword: randomKeyword, ideaTheme: '農業', idea: idea);
+        randomKeyword: randomKeyword, ideaText: ideaText, themeId: 0);
   }
 }

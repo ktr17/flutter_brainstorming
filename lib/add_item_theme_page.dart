@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_brainstorming/model/database_helper.dart';
+import 'package:flutter_brainstorming/model/theme_model.dart';
 
 class AddItemThemePage extends StatefulWidget {
   const AddItemThemePage({Key? key}) : super(key: key);
@@ -9,6 +11,7 @@ class AddItemThemePage extends StatefulWidget {
 
 class _AddItemThemePage extends State<AddItemThemePage> {
   final _themeTextEditingController = TextEditingController();
+  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +34,9 @@ class _AddItemThemePage extends State<AddItemThemePage> {
                 ),
                 // エンター押下時に入力したテーマをListViewへ追加し、画面を１つ戻す
                 onFieldSubmitted: (String? value) {
+                  // 入力したテーマをデータベースへ格納
+                  final _themeModel = ThemeModel.createTheme(themeText: value);
+                  _dbHelper.newTheme(_themeModel);
                   Navigator.pop(context, value);
                 },
               ))

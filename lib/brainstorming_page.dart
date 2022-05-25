@@ -4,7 +4,7 @@ import 'dart:math' as math; // ランダム値を取得するライブラリ
 import 'package:flutter/services.dart'; // rootBundle
 import 'package:flutter/material.dart';
 import 'package:flutter_brainstorming/model/idea_model.dart';
-import 'package:flutter_brainstorming/model/database.dart';
+import 'package:flutter_brainstorming/model/database_helper.dart';
 
 // ファイルを読み込んで表示
 Future loadAssetsCsvFile(String name) async {
@@ -34,6 +34,7 @@ class BrainPage extends StatefulWidget {
 class _BrainPageState extends State<BrainPage> {
   final _ideaLists = [];
   final _textEditingController = TextEditingController();
+  final DatabaseHelper dbHelper = DatabaseHelper();
 
   // CSVファイルを読み込み
   final List<String> _data = [];
@@ -88,10 +89,9 @@ class _BrainPageState extends State<BrainPage> {
                 // Enterキー押下でアイデアをリストに追加
                 onFieldSubmitted: (String? value) {
                   if (value == null) return;
-
                   // データベースにアイデアを保存
-                  var ideaModel = new IdeaModel.createIdea(value, _keyword);
-                  DBProvider.db.newIdea(ideaModel);
+                  final ideaModel = IdeaModel.createIdea(value, _keyword);
+                  dbHelper.newIdea(ideaModel);
 
                   setState(() {
                     // アイデアをListViewに追加
