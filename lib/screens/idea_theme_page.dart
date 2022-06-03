@@ -2,29 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_brainstorming/model/database_helper.dart';
 import 'package:flutter_brainstorming/model/theme_model.dart';
 
-class AddItemThemePage extends StatefulWidget {
-  const AddItemThemePage({Key? key}) : super(key: key);
+class ItemThemePage extends StatefulWidget {
+  const ItemThemePage({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _AddItemThemePage();
+  State<StatefulWidget> createState() => _ItemThemePage();
 }
 
-class _AddItemThemePage extends State<AddItemThemePage> {
+class _ItemThemePage extends State<ItemThemePage> {
   final _themeTextEditingController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar:
-            AppBar(title: const Text("テーマを入力"), foregroundColor: Colors.white),
+        appBar: AppBar(title: const Text("テーマを入力"), foregroundColor: Colors.white),
         body: Padding(
-          padding: EdgeInsets.only(top: 10, left: 5.0, right: 5.0, bottom: 0),
+          padding: const EdgeInsets.only(top: 10, left: 5.0, right: 5.0, bottom: 0),
           child: Column(
             children: <Widget>[
-              // const Padding(padding: EdgeInsets.fromLTRB(0, 10.0, 10.0, 0)),
               Form(
-                  child: TextFormField(
+                child: TextFormField(
                 controller: _themeTextEditingController,
                 decoration: const InputDecoration(
                   hintText: 'テーマ...',
@@ -35,9 +33,10 @@ class _AddItemThemePage extends State<AddItemThemePage> {
                 // エンター押下時に入力したテーマをListViewへ追加し、画面を１つ戻す
                 onFieldSubmitted: (String? value) {
                   // 入力したテーマをデータベースへ格納
-                  final _themeModel = ThemeModel.createTheme(themeText: value);
-                  _dbHelper.newTheme(_themeModel);
-                  Navigator.pop(context, value);
+                  final _themeModel = _dbHelper.newTheme(ThemeModel(themeText: value.toString()));
+
+                  // 戻り値に入力したテーマを格納する
+                  Navigator.pop(context, _themeModel);
                 },
               ))
             ],

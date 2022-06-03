@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_brainstorming/model/idea_model.dart';
 import 'package:flutter_brainstorming/model/theme_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:uuid/uuid.dart';
 
 ///アイデアをDBへ格納するためのヘルパークラス
 class DatabaseHelper {
@@ -26,14 +28,8 @@ class DatabaseHelper {
     _dbFilePath = dbDirectory.path;
 
     // データベースの配置場所を作成し、返却
-    final path = join(_dbFilePath, 'sample.db');
+    final path = join(_dbFilePath, 'brainstorming.db');
     return path;
-  }
-
-  // テーブルが存在しない場合は作成する
-  void _createTable(final Database db, final String tableName) async {
-    await db.execute(
-        'CREATE TABLE Theme(theme_id INTEGER PRIMARY KEY AUTOINCREMENT, theme_text TEXT)');
   }
 
   // TODO: データモデルごとに格納する処理は別クラスに分ける(テーマとアイデア)
@@ -43,9 +39,9 @@ class DatabaseHelper {
     final db = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
       await db.execute(
-          'CREATE TABLE Idea(idea_id INTEGER PRIMARY KEY AUTOINCREMENT, random_keyword TEXT, idea_text TEXT, theme_id INTEGER)');
+          'CREATE TABLE Idea(idea_id INTEGER PRIMARY KEY AUTOINCREMENT, random_keyword TEXT, idea_text TEXT, theme_id TEXT)');
       await db.execute(
-          'CREATE TABLE Theme(theme_id INTEGER PRIMARY KEY AUTOINCREMENT, theme_text TEXT)');
+          'CREATE TABLE Theme(theme_id TEXT PRIMARY KEY, theme_text TEXT)');
     });
     return db;
   }
@@ -59,19 +55,40 @@ class DatabaseHelper {
   }
 
   /// 新規のテーマをテーブルへ追加
-  newTheme(ThemeModel themeModel) async {
+  Future<ThemeModel> newTheme(ThemeModel themeModel) async {
     final db = await getDatabase();
+    final uuid = const Uuid().v1();
     final raw = await db.rawInsert(
-        'INSERT Into Theme(theme_text) VALUES ("${themeModel.themeText}")');
+        'INSERT Into Theme(theme_id, theme_text) VALUES ("$uuid", "${themeModel.getThemeText}")');
 
-    return raw;
+    final _themeModel =
+        ThemeModel(themeText: themeModel.getThemeText, themeId: uuid);
+
+    return _themeModel;
   }
 
   /// テーマの一覧を取得
   Future<List<Map<String, dynamic>>> getThemeList() async {
     final db = await getDatabase();
     // SELECT * FROM SELECT theme_text from Theme'
-    final result = db.query('Theme', columns: ['theme_text']);
+    final result = db.query('Theme', columns: ['theme_text', 'theme_id']);
+
+    return result;
+  }
+
+  /// テーマIDの一覧を取得
+  Future<List<Map<String, dynamic>>> getThemeIdList() async {
+    final db = await getDatabase();
+    final result = db.query('Theme', columns: ['theme_id']);
+
+    return result;
+  }
+
+  /// テーマIDに紐づくアイデアを取得
+  Future<List<Map<String, dynamic>>> getIdeaListFromDbByThemeId(
+      {required String themeId}) async {
+    final db = await getDatabase();
+    final result = db.query('Idea', where: 'theme_id = "$themeId"');
 
     return result;
   }
