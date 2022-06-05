@@ -5,6 +5,7 @@ import 'package:flutter_brainstorming/model/theme_model.dart';
 import 'package:flutter_brainstorming/screens/brainstorming_page.dart';
 import 'package:flutter_brainstorming/screens/idea_theme_page.dart';
 import 'package:flutter_brainstorming/components/list_tile.dart';
+
 /// アイデアのテーマを表示するためのListViewを表示
 class ItemThemeListView extends StatefulWidget {
   const ItemThemeListView({Key? key}) : super(key: key);
@@ -35,42 +36,30 @@ class _ItemThemeListView extends State<ItemThemeListView> {
           child: Stack(
             children: [
               // 記入済みのテーマの一覧を表示
-              ListView(                children: buildThemeComponentsList(),
+              ListView(
+                children: buildThemeComponentsList(),
               ),
 
               // テーマを追加するためのボタンを配置する
               Align(
-                alignment: Alignment.bottomRight,
-                child: GestureDetector(
-                  onTap: () async {
-                    // ideaThemaには遷移先からの返り値が格納される
-                    final ThemeModel _themeModel = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ItemThemePage()));
-                    setState(() {
-                      // リストにテーマを追加して、ListViewを更新する
-                      _ideaThemeList.add(_themeModel.getThemeText);
-                      // 追加したThemeModelをリストに格納する
-                      _themeModelList.add(_themeModel);
-                      // ListViewに値を追加する
-                    });
-                  },
-                  child: Container(
-                    width: 65,
-                    height: 65,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50),
-                      color: Colors.green,
-                    ),
-                    child: const Center(
-                        child: Text(
-                      '+',
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    )),
-                  ),
-                ),
-              ),
+                  alignment: Alignment.bottomRight,
+                  child: FloatingActionButton(
+                      child: const Icon(Icons.add, color: Colors.white),
+                      onPressed: () async {
+                        final ThemeModel _themeModel = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ItemThemePage())
+                        );
+
+                        setState(() {
+                          // リストにテーマを追加して、ListViewを更新する
+                          _ideaThemeList.add(_themeModel.getThemeText);
+                          // 追加したThemeModelをリストに格納する
+                          _themeModelList.add(_themeModel);
+                          // ListViewに値を追加する
+                        });
+                      })),
             ],
           ),
         ));
@@ -94,7 +83,8 @@ class _ItemThemeListView extends State<ItemThemeListView> {
   openThemeToRead(ThemeModel themeData) {
     Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => BrainstormPage(themeModel: themeData)));
+        MaterialPageRoute(
+          builder: (context) => BrainstormPage(themeModel: themeData)));
   }
 
   /// ListViewに持たせるためのデータをオンメモリ上に配置する

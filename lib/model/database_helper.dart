@@ -11,15 +11,12 @@ import 'package:uuid/uuid.dart';
 
 ///アイデアをDBへ格納するためのヘルパークラス
 class DatabaseHelper {
-  static DatabaseHelper _databaseHelper = DatabaseHelper._createInstance();
+  static final DatabaseHelper _databaseHelper = DatabaseHelper._createInstance();
   String _dbFilePath = '';
 
   DatabaseHelper._createInstance();
 
   factory DatabaseHelper() {
-    if (_databaseHelper == null) {
-      _databaseHelper = DatabaseHelper._createInstance();
-    }
     return _databaseHelper;
   }
 
@@ -32,7 +29,6 @@ class DatabaseHelper {
     return path;
   }
 
-  // TODO: データモデルごとに格納する処理は別クラスに分ける(テーマとアイデア)
   /// データベースを開く(存在しない場合は作成する)処理
   Future<Database> getDatabase() async {
     final path = await getDbPath();
