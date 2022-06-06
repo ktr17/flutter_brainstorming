@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_brainstorming/screens/item_theme_list_view.dart';
+import 'package:flutter_brainstorming/screen/item_theme_list_view.dart';
 
 
 /// アイデアテーマを登録・表示するView
