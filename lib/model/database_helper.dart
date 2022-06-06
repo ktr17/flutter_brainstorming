@@ -11,7 +11,8 @@ import 'package:uuid/uuid.dart';
 
 ///アイデアをDBへ格納するためのヘルパークラス
 class DatabaseHelper {
-  static final DatabaseHelper _databaseHelper = DatabaseHelper._createInstance();
+  static final DatabaseHelper _databaseHelper =
+      DatabaseHelper._createInstance();
   String _dbFilePath = '';
 
   DatabaseHelper._createInstance();
@@ -47,6 +48,14 @@ class DatabaseHelper {
     final db = await getDatabase();
     final raw = await db.rawInsert(
         'INSERT Into Idea(random_keyword, idea_text, theme_id) VALUES ("${newIdea.randomKeyword}", "${newIdea.ideaText}", "${newIdea.themeId}")');
+    return raw;
+  }
+
+  /// データ削除
+  removeTheme(ThemeModel themeModel) async {
+    final db = await getDatabase();
+    final raw = await db.delete("Theme",
+        where: "theme_id=?", whereArgs: [themeModel.getThemeId]);
     return raw;
   }
 
